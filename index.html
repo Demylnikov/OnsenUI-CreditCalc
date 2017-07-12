@@ -1,0 +1,152 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta http-equiv="Content-Security-Policy" content="default-src * data:; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+  <script src="components/loader.js"></script>
+  <script src="lib/onsenui/js/onsenui.min.js"></script>
+
+  <link rel="stylesheet" href="components/loader.css">
+  <link rel="stylesheet" href="lib/onsenui/css/onsenui.css">
+  <link rel="stylesheet" href="lib/onsenui/css/onsen-css-components.css">
+  <link rel="stylesheet" href="css/style.css">
+
+  <title>CreditCalc</title>
+
+  <script>
+
+    //3 input variables needed to calculate motrgage breakdown
+    var mortgageAmount;
+    var interest;
+    var payment;
+    //this is used to calculate duration of mortgage
+    var months = 0;
+    //monthly values of motrgage breakdown will be put here
+    var array = [];
+
+    // OnsenUI Page init event
+    document.addEventListener('init', function(event) {
+      var page = event.target;
+
+      if (page.matches('#first-page')) {
+
+        page.querySelector('#push-button').onclick = function() {
+
+          if (checkPassed()) {
+          document.querySelector('#navigator').pushPage('page2.html');
+          calculateCredit();
+        } else {
+          alert("Some of the values are negative or monthly interest payment is higher than monthly payment, adjust values.");
+        }
+
+        };
+
+      } else if (page.matches('#second-page')) {
+
+        //no functionality here yet
+
+      }
+    });
+
+  </script>
+</head>
+<body>
+  <ons-navigator id="navigator" page="page1.html"></ons-navigator>
+
+  <ons-template id="page1.html">
+    <ons-page id="first-page">
+      <ons-toolbar>
+        <div class="center">CreditCalc</div>
+      </ons-toolbar>
+
+      <div class="content" style="text-align: center">
+        <p>Mortgage amount</p>
+        <ons-input id="mortgageInput" type="number" modifier="underbar" float></ons-input>
+        <p>Interest rate</p>
+        <ons-input id="interestInput" type="number" modifier="underbar" float></ons-input>
+        <p>Monthly payment</p>
+        <ons-input id="paymentInput" type="number" modifier="underbar" float></ons-input>
+        <p><ons-button id="push-button" onclick="calculateCredit()">Calculate</ons-button></p>
+      </div>
+    </ons-page>
+
+  </ons-template>
+
+  <script>
+
+  //this checks if monthly interest rate is higher than monthly payment
+  function checkPassed() {
+    mortgageAmount = document.getElementById("mortgageInput").value;
+    interest = document.getElementById("interestInput").value;
+    payment = document.getElementById("paymentInput").value;
+
+    if (((parseFloat(mortgageAmount) * parseFloat(interest)/100)/12) >= parseFloat(payment)) {
+      return false;
+    } else if(parseFloat(mortgageAmount) < 0 || parseFloat(interest) < 0 || parseFloat(payment) < 0){
+      return false;
+    } else {
+      return true;
+    }
+
+  }
+
+  function calculateCredit() {
+
+    mortgageAmount = document.getElementById("mortgageInput").value;
+    interest = document.getElementById("interestInput").value;
+    payment = document.getElementById("paymentInput").value;
+    array = [];
+
+
+    while (parseFloat(mortgageAmount) > parseFloat(payment)) {
+      var tilgung = payment - (mortgageAmount*(interest/100))/12;
+      mortgageAmount = mortgageAmount - tilgung;
+      months++;
+      array.push(months + ". Rest: " + mortgageAmount.toFixed(2) + "€ Tilgung: " + tilgung.toFixed(2) + "€ Zinsen: " + (payment - tilgung).toFixed(2) + "€");
+      //console.log(months + ". Rest: " + mortgageAmount + " Tilgung: " + tilgung + " Zinsen: " + (payment - tilgung));
+    }
+
+    var kreditdauerM = months+1;
+    var kreditdauerJ = kreditdauerM/12;
+    //console.log(kreditdauerM + ". Letzter Monat mit Restbetrag von " + mortgageAmount + " ausbezahlt");
+    //console.log("Kreditdauer: " + kreditdauerM + " Monate oder ca. " + kreditdauerJ + " Jahre");
+
+    months = 0;
+    setTimeout(function() {makeList(array, kreditdauerM, kreditdauerJ)}, 1);
+
+  }
+
+  //creates a list on the second page
+  function makeList(array, kreditdauerM, kreditdauerJ) {
+
+    //creates header of the list which shows duration of mortgage
+    var header = document.createElement('ons-list-header');
+    header.appendChild(document.createTextNode("Kreditdauer: " + kreditdauerM + " Monate oder ca. " + kreditdauerJ.toFixed(1) + " Jahre"));
+    document.getElementById("list").appendChild(header);
+
+    for (var i = 0; i < array.length; i++) {
+      var item = document.createElement('ons-list-item');
+      item.appendChild(document.createTextNode(array[i]));
+      document.getElementById("list").appendChild(item);
+    }
+  }
+
+  </script>
+
+  <ons-template id="page2.html">
+    <ons-page id="second-page">
+      <ons-toolbar>
+        <div class="left"><ons-back-button>Back</ons-back-button></div>
+        <div class="center">Monthly breakdown</div>
+      </ons-toolbar>
+
+      <div id="list" class="content" style="text-align: center">
+
+      </div>
+    </ons-page>
+  </ons-template>
+
+
+</body>
+</html>
