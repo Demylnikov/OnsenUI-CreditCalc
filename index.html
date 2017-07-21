@@ -85,6 +85,8 @@
       return false;
     } else if(parseFloat(mortgageAmount) < 0 || parseFloat(interest) < 0 || parseFloat(payment) < 0){
       return false;
+    } else if(mortgageAmount == "" || interest == "" || payment == "" || mortgageAmount == null || interest == null || payment == null) {
+      return false;
     } else {
       return true;
     }
@@ -109,7 +111,7 @@
 
     var kreditdauerM = months+1;
     var kreditdauerJ = kreditdauerM/12;
-    //console.log(kreditdauerM + ". Letzter Monat mit Restbetrag von " + mortgageAmount + " ausbezahlt");
+    array.push(kreditdauerM + ". Last month repaid the mortgage with the rest of " + mortgageAmount + " €");
     //console.log("Kreditdauer: " + kreditdauerM + " Monate oder ca. " + kreditdauerJ + " Jahre");
 
     months = 0;
@@ -122,7 +124,7 @@
 
     //creates header of the list which shows duration of mortgage
     var header = document.createElement('ons-list-header');
-    header.appendChild(document.createTextNode("Kreditdauer: " + kreditdauerM + " Monate oder ca. " + kreditdauerJ.toFixed(1) + " Jahre"));
+    header.appendChild(document.createTextNode("Mortgage duration: " + kreditdauerM + " months or " + kreditdauerJ.toFixed(1) + " years"));
     document.getElementById("list").appendChild(header);
 
     for (var i = 0; i < array.length; i++) {
@@ -142,7 +144,6 @@
       </ons-toolbar>
 
       <div id="list" class="content" style="text-align: center">
-
       </div>
     </ons-page>
   </ons-template>
