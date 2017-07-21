@@ -37,7 +37,8 @@
           document.querySelector('#navigator').pushPage('page2.html');
           calculateCredit();
         } else {
-          alert("Some of the values are negative or monthly interest payment is higher than monthly payment, adjust values.");
+          //alert("Some of the values are negative or monthly interest payment is higher than monthly payment, adjust values.");
+          //showDialog('alertbox', "Some of the values are broken");
         }
 
         };
@@ -69,11 +70,34 @@
         <ons-input id="paymentInput" type="number" modifier="underbar" float></ons-input>
         <p><ons-button id="push-button" onclick="calculateCredit()">Calculate</ons-button></p>
       </div>
+
+      <ons-alert-dialog id="alertbox">
+        <div class="alert-dialog-title">Oops!</div>
+        <div id="errortext" class="alert-dialog-content">
+        </div>
+        <div class="alert-dialog-footer">
+          <button class="alert-dialog-button" onclick="hideDialog('alertbox')">OK</button>
+        </div>
+      </ons-alert-dialog>
+
     </ons-page>
 
   </ons-template>
 
   <script>
+
+  var showDialog = function (id, errorMessage) {
+    document.getElementById('errortext').innerHTML = errorMessage;
+  document
+    .getElementById(id)
+    .show();
+  };
+
+  var hideDialog = function (id) {
+  document
+    .getElementById(id)
+    .hide();
+  };
 
   //this checks if monthly interest rate is higher than monthly payment
   function checkPassed() {
@@ -82,10 +106,13 @@
     payment = document.getElementById("paymentInput").value;
 
     if (((parseFloat(mortgageAmount) * parseFloat(interest)/100)/12) >= parseFloat(payment)) {
+      showDialog('alertbox', "Monthly interest is higher than payment.");
       return false;
-    } else if(parseFloat(mortgageAmount) < 0 || parseFloat(interest) < 0 || parseFloat(payment) < 0){
+    } else if(parseFloat(mortgageAmount) <= 0 || parseFloat(interest) < 0 || parseFloat(payment) <= 0){
+      showDialog('alertbox', "Some of the values are negative or zero.");
       return false;
     } else if(mortgageAmount == "" || interest == "" || payment == "" || mortgageAmount == null || interest == null || payment == null) {
+      showDialog('alertbox', "Some of the fields are empty, please fill out missing fields.");
       return false;
     } else {
       return true;
@@ -111,7 +138,7 @@
 
     var kreditdauerM = months+1;
     var kreditdauerJ = kreditdauerM/12;
-    array.push(kreditdauerM + ". Last month repaid the mortgage with the rest of " + mortgageAmount + " €");
+    array.push(kreditdauerM + ". Last month repaid the mortgage with the rest of " + mortgageAmount.toFixed(2) + " €");
     //console.log("Kreditdauer: " + kreditdauerM + " Monate oder ca. " + kreditdauerJ + " Jahre");
 
     months = 0;
